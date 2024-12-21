@@ -1,11 +1,11 @@
 document.getElementById("btnword").addEventListener("click", () => {
   // Word.html 파일 열기
-  window.location.href = "word.html";
+  window.location.href = "/word";
 });
 
 document.getElementById("btnmain").addEventListener("click", () => {
   // index.html 파일 열기
-  window.location.href = "index.html";
+  window.location.href = "/";
 });
 
 //----------------------언어 변경 -------------------------//
@@ -782,7 +782,7 @@ function addMessage(message, sender) {
   chatbox.scrollTop = chatbox.scrollHeight; // 최신 메시지로 스크롤 이동
 }
 
-// 메시지 전송 이벤트
+// // 메시지 전송 이벤트
 document.getElementById("sendButton").addEventListener("click", sendMessage);
 document.getElementById("userInput").addEventListener("keypress", function (e) {
   if (e.key === "Enter") {
@@ -790,54 +790,97 @@ document.getElementById("userInput").addEventListener("keypress", function (e) {
   }
 });
 
-// 메시지 전송 함수
+// // 메시지 전송 함수
+// function sendMessage() {
+//   const inputField = document.getElementById("userInput");
+//   const userMessage = inputField.value.trim(); // 사용자가 입력한 텍스트
+
+//   if (userMessage === "") return; // 빈 입력 방지
+//   console.log("User Message:", userMessage);
+//   // 사용자 메시지를 채팅에 추가
+//   addMessage(userMessage, "user");
+
+//   // API를 통해 봇 응답 생성
+//   getBotResponse(userMessage).then((botMessage) => {
+//     console.log("Bot Message:", botMessage);
+//     // 봇의 메시지를 채팅에 추가
+//     addMessage(botMessage, "bot");
+
+//     // 대화 기록 요약 및 저장 (선택적 기능)
+//     saveConversationAndSummarize(userMessage, botMessage);
+//   });
+
+//   inputField.value = ""; // 입력 필드 초기화
+// }
+
+// // OpenAI API 호출 함수
+// async function getBotResponse(userMessage) {
+//   const url = "./ask/" + encodeURIComponent(userMessage);
+
+//   try {
+//     const response = await fetch(url, {
+//       method: "GET", // POST를 사용하는 경우 JSON 데이터 설정 필요
+//     });
+
+//     // 응답 데이터 파싱
+//     const data = await response.json();
+
+//     // API 응답에서 answer 또는 reply 값을 반환
+//     return (
+//       data.answer || data.reply || "죄송합니다, 응답을 생성할 수 없습니다."
+//     );
+//   } catch (error) {
+//     console.error("Error fetching bot response:", error);
+//     return "서버와 통신 중 문제가 발생했습니다.";
+//   }
+// }
 function sendMessage() {
   const inputField = document.getElementById("userInput");
   const userMessage = inputField.value.trim(); // 사용자가 입력한 텍스트
 
   if (userMessage === "") return; // 빈 입력 방지
+
   console.log("User Message:", userMessage);
-  // 사용자 메시지를 채팅에 추가
-  addMessage(userMessage, "user");
+  const userMessageElement = addMessage(userMessage, "user");
 
-  // API를 통해 봇 응답 생성
-  getBotResponse(userMessage).then((botMessage) => {
-    console.log("Bot Message:", botMessage);
-    // 봇의 메시지를 채팅에 추가
-    addMessage(botMessage, "bot");
+  // 사용자 메시지를 화면에 표시
+  userMessageElement.scrollIntoView({ behavior: "smooth", block: "end" });
 
-    // 대화 기록 요약 및 저장 (선택적 기능)
-    saveConversationAndSummarize(userMessage, botMessage);
-  });
+    // Flask 서버로 POST 요청 전송
+    fetch("/ask", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: `userInput=${encodeURIComponent(userMessage)}`,
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        const botMessage = data.answer;
+        console.log("Bot Message:", botMessage);
+        // 봇의 메시지를 약간의 지연 후에 추가
+        setTimeout(() => {
+          const botMessageElement = addMessage(botMessage, "bot");
+
+          // 봇 메시지를 화면에 표시
+          botMessageElement.scrollIntoView({ behavior: "smooth", block: "end" });
+
+          // 대화 기록 요약 및 저장 (선택적 기능)
+          // saveConversationAndSummarize(userMessage, botMessage);
+        }, 500); // 0.5초 지연
+      })
+      .catch((error) => {
+        console.error("Error fetching bot response:", error);
+        addMessage("서버와 통신 중 문제가 발생했습니다.", "bot");
+      });
 
   inputField.value = ""; // 입력 필드 초기화
-}
-
-// OpenAI API 호출 함수
-async function getBotResponse(userMessage) {
-  const url = "https://lawbot.asuscomm.com/" + encodeURIComponent(userMessage);
-
-  try {
-    const response = await fetch(url, {
-      method: "GET", // POST를 사용하는 경우 JSON 데이터 설정 필요
-    });
-
-    // 응답 데이터 파싱
-    const data = await response.json();
-
-    // API 응답에서 answer 또는 reply 값을 반환
-    return (
-      data.answer || data.reply || "죄송합니다, 응답을 생성할 수 없습니다."
-    );
-  } catch (error) {
-    console.error("Error fetching bot response:", error);
-    return "서버와 통신 중 문제가 발생했습니다.";
-  }
 }
 
 // ------------예린님 압정 ! ---------------//
 /*--------------------------------------------과거 대화 part-------------------------------------------------------------------------------------*/
 // 과거 대화 모달 관련 DOM 요소
+
 const historyModal = document.getElementById("historyModal");
 const closeHistoryModal = document.getElementById("closeHistoryModal");
 const btnList = document.getElementById("btnlist");
@@ -952,15 +995,34 @@ const recognition = new (window.SpeechRecognition ||
   window.webkitSpeechRecognition)();
 recognition.lang = "ko-KR";
 
+// 음성 인식 부분 수정
 recognition.onresult = (event) => {
   const transcript = event.results[0][0].transcript;
   addMessage(transcript, "user");
 
-  // 봇 응답 처리
-  getBotResponse(transcript).then((botMessage) => {
-    addMessage(botMessage, "bot");
-  });
+  // Flask 서버로 POST 요청 전송
+  fetch("/ask", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+    body: `question=${encodeURIComponent(transcript)}`,
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      const botMessage = data.answer;
+      addMessage(botMessage, "bot");
+    })
+    .catch((error) => {
+      console.error("Error fetching bot response:", error);
+      addMessage("서버와 통신 중 문제가 발생했습니다.", "bot");
+    });
 };
+//   // 봇 응답 처리
+//   getBotResponse(transcript).then((botMessage) => {
+//     addMessage(botMessage, "bot");
+//   });
+// };
 
 recognition.onerror = (event) => {
   console.error("음성 인식 에러:", event.error);
@@ -1178,8 +1240,9 @@ const msalConfig = {
   auth: {
     clientId: "0632e983-5a3c-4913-9ce5-4c81c8c4f99d", // Azure AD B2C 애플리케이션(클라이언트) ID로 변경
     authority:
-      "https://teamlawbot.b2clogin.com/YOUR_TENANT_NAME.onmicrosoft.com/B2C_1_signup-signin", // Azure AD B2C 테넌트 및 사용자 흐름 이름으로 변경
-    redirectUri: "http://localhost:3000", // 로그인 후 리디렉션할 URI (배포 후 실제 URL로 변경)
+      "https://teamlawbot.b2clogin.com/teamlawbot.onmicrosoft.com/B2C_1_signup-signin", // Azure AD B2C 테넌트 및 사용자 흐름 이름으로 변경
+      knownAuthorities: ["teamlawbot.b2clogin.com"] ,
+      redirectUri: "http://localhost:3000",
   },
   cache: {
     cacheLocation: "localStorage", // 브라우저 저장소 사용
@@ -1193,7 +1256,7 @@ const msalInstance = new msal.PublicClientApplication(msalConfig);
 // 로그인 버튼 클릭 이벤트 처리
 document.querySelector(".login-btn").addEventListener("click", () => {
   msalInstance
-    .loginPopup({
+    .loginPopup({     
       scopes: ["openid", "profile", "email"], // 필요한 범위 설정
     })
     .then((loginResponse) => {

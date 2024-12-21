@@ -4,13 +4,9 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Document</title>
-    <link rel="stylesheet" href="style.css" />
-    <script src="script.js" defer></script>
-     <!-- MSAL 라이브러리 추가 -->
-     <script type="text/javascript" src="https://alcdn.msauth.net/browser/2.3.0/js/msal-browser.min.js"></script>
-<script type="text/javascript">
-    if(typeof msal === 'undefined')document.write(unescape("%3Cscript src='https://alcdn.msftauth.net/browser/2.3.0/js/msal-browser.min.js' type='text/javascript' %3E%3C/script%3E"));
-</script>
+    <link rel="stylesheet" href="word_style.css" />
+    <script src="word_script.js" defer></script>
+
     <link
       href="https://hangeul.pstatic.net/hangeul_static/css/nanum-square.css"
       rel="stylesheet"
@@ -18,7 +14,6 @@
   </head>
   <body>
     <div class="main-container">
-      <button class="login-btn" id="btnlogin">🔑</button>
       <!-- 과거 이력 확인 및 용어 정리 -->
       <button id="btnmain" class="main-btn">💭</button>
       <button id="btnword" class="word-btn">📖</button>
@@ -30,34 +25,6 @@
         <div id="chatbox" class="chat-box"></div>
         <!-- 입력 컨테이너 -->
         <div class="input-container">
-          <!-- 자동 응답 버튼 -->
-          <div class="quick-reply-buttons">
-            <button
-              class="quick-reply"
-              data-topic="사용방법"
-              id="btnGuide"
-              data-topic="저희 LawBot의 사용 방법을 안내해드릴게요."
-            >
-              사용 방법 💡
-            </button>
-            <button
-              class="quick-reply"
-              data-topic="이민준비"
-              id="btnPrep"
-              data-topic="이민을 준비하시는 과정에 도움을 드릴 수 있는 법률 정보를 안내해드릴게요."
-            >
-              이민준비 ✔️
-            </button>
-            <button class="quick-reply" data-topic="임대차계약" id="btnLease">
-              임대차 계약 🏠
-            </button>
-            <button class="quick-reply" data-topic="4대보험" id="btnInsurance">
-              4대 보험 ⚖️
-            </button>
-            <button class="quick-reply" data-topic="노동법" id="btnLaborLaw">
-              노동법 💼
-            </button>
-          </div>
           <!-- 사용자 입력창 및 전송 버튼 -->
           <div class="input-row">
             <!-- 언어 변경 및 음성 인식 버튼 -->
@@ -66,12 +33,10 @@
               type="text"
               class="input-box"
               id="userInput"
-              onkeyup="checkEnter(event)"   
+              onkeyup="checkEnter(event)"
             />
             <button id="voiceButton" class="voice">🎤</button>
-            <form action="/ask" method="POST">
             <button class="send-btn" id="sendButton">전송</button>
-            </form>
           </div>
         </div>
       </div>

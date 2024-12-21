@@ -7,10 +7,7 @@
     <link rel="stylesheet" href="style.css" />
     <script src="script.js" defer></script>
      <!-- MSAL 라이브러리 추가 -->
-     <script type="text/javascript" src="https://alcdn.msauth.net/browser/2.3.0/js/msal-browser.min.js"></script>
-<script type="text/javascript">
-    if(typeof msal === 'undefined')document.write(unescape("%3Cscript src='https://alcdn.msftauth.net/browser/2.3.0/js/msal-browser.min.js' type='text/javascript' %3E%3C/script%3E"));
-</script>
+     <script src="https://cdnjs.cloudflare.com/ajax/libs/msal/1.4.1/msal.min.js"></script>
     <link
       href="https://hangeul.pstatic.net/hangeul_static/css/nanum-square.css"
       rel="stylesheet"
@@ -18,7 +15,7 @@
   </head>
   <body>
     <div class="main-container">
-      <button class="login-btn" id="btnlogin">🔑</button>
+      <button class="login-btn">🔑</button>
       <!-- 과거 이력 확인 및 용어 정리 -->
       <button id="btnmain" class="main-btn">💭</button>
       <button id="btnword" class="word-btn">📖</button>
@@ -66,12 +63,10 @@
               type="text"
               class="input-box"
               id="userInput"
-              onkeyup="checkEnter(event)"   
+              onkeyup="checkEnter(event)"
             />
             <button id="voiceButton" class="voice">🎤</button>
-            <form action="/ask" method="POST">
             <button class="send-btn" id="sendButton">전송</button>
-            </form>
           </div>
         </div>
       </div>

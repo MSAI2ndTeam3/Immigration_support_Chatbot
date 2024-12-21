@@ -6,6 +6,8 @@ from fastapi import FastAPI
 from typing import Optional
 import uvicorn
 from fastapi.middleware.cors import CORSMiddleware
+from flask import Flask, render_template, jsonify, request
+
 # from api_key import search_endpoint, search_api_key, azure_openai_endpoint, azure_openai_api_key
 SEARCH_ENDPOINT = "https://ai-search-team3.search.windows.net"
 SEARCH_API_KEY = "SVteEFiHV62vyfZ56a6xsfba10kfSLoGseuenSigufAzSeCa4IB1"
@@ -17,14 +19,18 @@ SEARCH_INDEX_NAME = "immigrationlaw-index"
 # 언어 감지기 초기화
 detector = LanguageDetectorBuilder.from_all_languages().build()
 
-# FastAPI 호출출
-app = FastAPI()
+# Flask 앱 생성
+app = Flask(__name__)
 
-app.add_middleware(
-    CORSMiddleware,    
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# # FastAPI 호출출
+# fast_app = FastAPI()
+
+# fast_app.add_middleware(
+#     CORSMiddleware,    
+#     allow_origins=["*"],
+#     allow_methods=["*"],
+#     allow_headers=["*"],
+# )
 
 
 def detect_language(text):
@@ -179,8 +185,27 @@ def ask_legal_question(user_input):
         return fallback_to_gpt(user_input, detected_language)
 
 # FAST API   
-@app.get("/ask")
-def ask_endpoint(question: str):
-    answer=ask_legal_question(question)
-    return {"answer": answer}
+# @fast_app.post("/ask")
+# def ask_endpoint(question: str):
+#     answer=ask_legal_question(question)
+#     return {"answer": answer}
 
+# Flask 라우트
+@app.route("/")
+def index():
+    return render_template("index.html")
+
+@app.route("/word")
+def word():
+    return render_template("word.html")
+
+@app.route("/ask", methods=["POST"])
+def ask():
+    question = request.get_data().decode("utf-8")
+    answer = ask_legal_question(question)
+    return jsonify({"answer": answer})
+
+
+if __name__ == "__main__":
+    app.run(debug=True, port=3000)
+    # uvicorn.run(fast_app, host="0.0.0.0", port=8000)
